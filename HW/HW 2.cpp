@@ -1,17 +1,16 @@
 #include <iostream>
 #include <cstring>
 
-using namespace std;
-
 int main() {
 //1
     for(int i = 1; i <= 55; i++) {
-        printf("%d", i^2 -1, " , ");
+        printf("%d", i^2 -1);
+        printf(", ");
     }
-printf("/n");
+printf("\n");
 //2
     double quarterpi = 0;
-	int num = 2000000;
+	int num = 20;
 	int i;
 	int denom;
 	double term;
@@ -27,9 +26,9 @@ printf("/n");
 
 		printf("%d   %d        %.30f     %.30f\n", i, denom, term, quarterpi * 4);
 	}
-printf("/n");
+printf("\n");
 //3
-    string x = "abc";
+    char x[] = "abc";
     for(char ch = 'a'; ch < 'd'; ch++) {
         printf("{ ");
         for(char ch = 'a'; ch < 'd'; ch++) {
@@ -39,22 +38,21 @@ printf("/n");
         }
         printf(" } ");
     }
-printf("/n");
+printf("\n");
 //4
     char sentence[] = "Jump in the Cadillac, girl, let's put some miles on it";
     printf("%d", sentence[0]);
     for(int i = 0; i < sizeof(sentence); i++) {
-        if(sentence[i] == ' ') printf("%d", toupper(sentence[i + 1]));
+        if(sentence[i] == ' ') printf("%d", sentence[i + 1] - 32);
     }
-printf("/n");
+printf("\n");
 //5
     char str[] = "aabbb";
     int strlength = strlen(str);
 
     // for each group size g
     int g = strlength;
-    while (g > 0)
-    {
+    while (g > 0) {
         int c = g;
         int istart = 0;
         int istop = strlength - g;
