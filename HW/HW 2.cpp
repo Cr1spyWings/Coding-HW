@@ -9,68 +9,54 @@ int main() {
     }
 printf("\n");
 //2
-    double quarterpi = 0;
-	int num = 20;
-	int i;
-	int denom;
-	double term;
-	int sign = 1;
+    double pi = 0, term;
+	int num = 2000, i, denom, sign = 1;
 
 	printf("i   denom    term                                 pi\n");
-	for (i = 0; i <= num; i++)
-	{
+	for (i = 0; i <= num; i++) {
 		denom = i * 2 + 1;
 		term = (1 / (double)denom);
-		quarterpi = quarterpi + sign * term;
+		pi = pi + sign * term * 4;
 		sign = sign * (-1);
 
-		printf("%d   %d        %.30f     %.30f\n", i, denom, term, quarterpi * 4);
+		printf("%d   %d        %.30f     %.30f\n", i, denom, term, pi);
 	}
 printf("\n");
 //3
     char x[] = "abc";
-    for(char ch = 'a'; ch < 'd'; ch++) {
-        printf("{ ");
-        for(char ch = 'a'; ch < 'd'; ch++) {
-            for(char ch = 'a'; ch < 'd'; ch++) {
-                printf("%d", ch);
+    for (char ch1 = 0; ch1 < 3; ch1++) {
+        for (char ch2 = 0; ch2 < 3; ch2++) {
+            for (char ch3 = 0; ch3 < 3; ch3++) {
+                printf("{ %c%c%c } ", x[ch1], x[ch2], x[ch3]);
             }
         }
-        printf(" } ");
     }
 printf("\n");
 //4
     char sentence[] = "Jump in the Cadillac, girl, let's put some miles on it";
-    printf("%d", sentence[0]);
-    for(int i = 0; i < sizeof(sentence); i++) {
-        if(sentence[i] == ' ') printf("%d", sentence[i + 1] - 32);
+    printf("%c", sentence[0]);
+    for(int i = 0; i < sizeof(sentence) - 1; i++) {
+        if(sentence[i] == ' ') {
+            char nextChar = sentence[i + 1];
+            if(nextChar >= 'a' && nextChar <= 'z') {
+                printf("%c", nextChar - 32);
+            } else {
+                printf("%c", nextChar);
+            }
+        }
     }
 printf("\n");
 //5
     char str[] = "aabbb";
     int strlength = strlen(str);
 
-    // for each group size g
-    int g = strlength;
-    while (g > 0) {
-        int c = g;
-        int istart = 0;
-        int istop = strlength - g;
-
-        do {     // doing this g times
-
-            // output the substring here
-            for (int i = istart; i <= istop; i++)
-            {
+    for (int start = 0; start < strlength; start++) {
+        for (int len = 1; len <= strlength - start; len++) {
+            for (int i = start; i < start + len; i++) {
                 printf("%c", str[i]);
             }
             printf("  ");
-
-            istart++; istop++;
-
-            c--;
-        } while (c > 0);
-
-        g--;
+        }
     }
+    printf("\n");
 }
