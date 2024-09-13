@@ -10,7 +10,7 @@ int main() {
 printf("\n");
 //2
     double pi = 0, term;
-	int num = 2000, i, denom, sign = 1;
+	int num = 200, i, denom, sign = 1;
 
 	printf("i   denom    term                                 pi\n");
 	for (i = 0; i <= num; i++) {
