@@ -57,9 +57,11 @@ Returns the value as a 32 bit integer
 */
 long my_atoi(char* s, int base)
 {
-    // you must write this function so 
-    // so return a dummy for now
-    return 42;
+    int dec = 0;
+    for(int i = 0; i < sizeof(s); i++) {
+        dec += static_cast<int>(s[i]) * my_pow(base, sizeof(s) - i);
+    }
+    return dec;
 }
 
 /*
@@ -70,7 +72,20 @@ void my_itoa(long n, char* sOut, int base)
 {
     // you must write this function so 
     // so return a dummy for now
-    strcpy(sOut, "39");
+    char s[36];
+    int count = 0;
+    int x = static_cast<int>(n);
+    while(x != 0) {
+        s[count] = x % base;
+        x = x / base;
+        count++;
+    }
+    char s2[sizeof(s)];
+    for(int i = 0; i < count; i++) {
+        s2[i] = s[count];
+        count--;
+    }
+    strcpy(sOut, s2);
 }
 
 
