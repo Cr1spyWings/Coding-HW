@@ -35,6 +35,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
 #pragma warning( disable : 4996) 
 #pragma warning( disable : 4244) 
 
@@ -57,9 +58,30 @@ Returns the value as a 32 bit integer
 */
 long my_atoi(char* s, int base)
 {
-    int dec = 0;
-    for(int i = 0; i < sizeof(s); i++) {
-        dec += static_cast<int>(s[i]) * my_pow(base, sizeof(s) - i);
+    long dec = 0;
+    int len = strlen(s);
+    
+    if (base < 2 || base > 36) {
+        return -1; 
+    }
+
+    for (int i = 0; i < len; i++) {
+        char c = s[i];
+        int value;
+
+        if (isdigit(c)) {
+            value = c - '0'; 
+        } else if (isalpha(c)) {
+            value = tolower(c) - 'a' + 10;
+        } else {
+            return -1;
+        }
+
+        if (value >= base) {
+            return -1; 
+        }
+
+        dec += value * my_pow(base, len - i - 1);
     }
     return dec;
 }
@@ -70,22 +92,29 @@ representation of a base 'base' number
 */
 void my_itoa(long n, char* sOut, int base)
 {
-    // you must write this function so 
-    // so return a dummy for now
-    char s[36];
+    if (base < 2 || base > 36) {
+        strcpy(sOut, "Invalid base");
+        return;
+    }
+
+    if (n < 0 && base == 10) {
+        *sOut++ = '-';
+        n = -n;
+    }
+
+    char s[36]; 
     int count = 0;
-    int x = static_cast<int>(n);
-    while(x != 0) {
-        s[count] = x % base;
-        x = x / base;
-        count++;
+
+    do {
+        int digit = n % base;
+        s[count++] = (digit < 10) ? (digit + '0') : (digit - 10 + 'A');
+        n /= base;
+    } while (n > 0);
+
+    for (int i = 0; i < count; i++) {
+        sOut[i] = s[count - 1 - i];
     }
-    char s2[sizeof(s)];
-    for(int i = 0; i < count; i++) {
-        s2[i] = s[count];
-        count--;
-    }
-    strcpy(sOut, s2);
+    sOut[count] = '\0';
 }
 
 
@@ -94,9 +123,15 @@ Converts an integer to base 4 codon format
 */
 void itoDNAcodon(char* codon, int i)
 {
-    // you must write this function so 
-    // return a hard coded dummy value for now
-    strcpy(codon, "ACT");
+    char bases[] = {'A', 'C', 'G', 'T'};
+    int index = 0;
+
+    for (int j = 0; j < 3; j++) {
+        codon[2 - j] = bases[i % 4]; 
+        i /= 4; 
+    }
+
+    codon[3] = '\0';
 }
 
 
@@ -159,46 +194,59 @@ input s1, s2, base, return sum
 */
 void addInBase(char s1[], char s2[], char sum[], int base)
 {
-    // return a dummy for now until you get it actually working
-    strcpy(sum, "1153");
+    char n1[30], n2[30], n3[30], result[30];
+    int maxLen = (strlen(s1) > strlen(s2) ? strlen(s1) : strlen(s2)) + 1;
 
-    char n1[30], n2[30], n3[30];
-
-    // initialize numerical arrays to all zeros
-    {
-
+    int len1 = strlen(s1);
+    int len2 = strlen(s2);
+    
+    for (int i = 0; i < len1; i++) {
+        if (s1[len1 - 1 - i] >= '0' && s1[len1 - 1 - i] <= '9') {
+            n1[i] = s1[len1 - 1 - i] - '0';
+        } else {
+            n1[i] = s1[len1 - 1 - i] - 'A' + 10; 
+        }
+    }
+    
+    for (int i = 0; i < len2; i++) {
+        if (s2[len2 - 1 - i] >= '0' && s2[len2 - 1 - i] <= '9') {
+            n2[i] = s2[len2 - 1 - i] - '0';
+        } else {
+            n2[i] = s2[len2 - 1 - i] - 'A' + 10; 
+        }
+    }
+    
+    int carry = 0;
+    for (int i = 0; i < maxLen; i++) {
+        int sumDigit = n1[i] + n2[i] + carry;
+        result[i] = sumDigit % base; 
+        carry = sumDigit / base;
     }
 
-    // copy chars to numerical arrays in reverse order
-    {
-        // subtract '0'
-        // if character > '9' then subtract another 7
+    int start = maxLen - 1;
+    while (start >= 0 && result[start] == 0) {
+        start--;
     }
 
-    // do the actual addition
-    // loop thru the numerical array
-    {
-        // add
-        // mod
-        // div
+    int sumIndex = 0;
+    for (int i = start; i >= 0; i--) {
+        if (result[i] < 10) {
+            sum[sumIndex++] = result[i] + '0';
+        } else {
+            sum[sumIndex++] = result[i] - 10 + 'A'; 
+        }
     }
-
-    // find first non zero from "left"
-
-    // copy numbers back to string and reverse order
-    {
-        // add '0'
-        // if number > 9 then add another 7
-
-        // replace zeros with spaces
+    
+    if (sumIndex == 0) {
+        sum[sumIndex++] = '0';
     }
-    // add the null terminator
-
+    
+    sum[sumIndex] = '\0';
 }
 
 
 
-void main()
+int main()
 {
     char sIn[] = "16";
     char sOut[80];
@@ -213,6 +261,15 @@ void main()
     printf("%d base 10 is %s base 11\n", n, sOut);
 
     // DO SEVERAL MORE
+    char sIn2[] = "A4";
+    char sOut2[35];
+    long n2 = 0;
+
+    n2 = my_atoi(sIn2, 19);
+    printf("%s base 19 is %d base 10\n", sIn2, n2);
+
+    my_itoa(n2, sOut2, 3);
+    printf("%d base 10 is %s base 3\n", n2, sOut2);
 
     // now do it with DNA 
     char muhGenes[4] = "ACT";
@@ -224,6 +281,14 @@ void main()
     itoDNAcodon(buffy, n);
     printf("%d base 10 is %s in DNA\n", n, muhGenes);
 
+    char muhGenes2[4] = "GAT";
+    n = DNAcodontoi(muhGenes2);
+    printf("%s in DNA is %d base 10\n", muhGenes2, n);
+
+    char buffy2[4];
+    itoDNAcodon(buffy2, n);
+    printf("%d base 10 is %s in DNA\n", n, muhGenes2);
+
     // test adding strings in arbitrary bases
     char s1[] = "543";
     char s2[] = "210";
@@ -231,5 +296,19 @@ void main()
     int b = 6;
     addInBase(s1, s2, sum, b);
     printf("%s + %s in base %d is %s\n", s1, s2, b, sum);
+
+    char s3[] = "824";
+    char s4[] = "55";
+    char sum2[20];
+    int b2 = 4;
+    addInBase(s3, s4, sum2, b2);
+    printf("%s + %s in base %d is %s\n", s3, s4, b2, sum2);
+
+    char s5[] = "387";
+    char s6[] = "621";
+    char sum3[20];
+    int b3 = 14;
+    addInBase(s5, s6, sum3, b3);
+    printf("%s + %s in base %d is %s\n", s5, s6, b3, sum3);
 
 }
