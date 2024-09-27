@@ -513,15 +513,20 @@ unsigned char multiplyFloats(unsigned char f1, unsigned char f2)
 
 }
 
-
 int main()
 {
 	char strIn1[40] = "0.125";
 	char strIn2[40] = "4.5";
+    char strIn3[40] = "3.25";
+	char strIn4[40] = "0.575";
 	char strOut[40];
+    char strOut2[40];
 	unsigned char f1;
 	unsigned char f2;
 	unsigned char f3; 
+    unsigned char f4;
+    unsigned char f5;
+    unsigned char f6;
 
 	// multiply some stuff
 	f1 = my_atof(strIn1);
@@ -530,5 +535,26 @@ int main()
 	my_ftoa(f3, strOut);
 	printf("%s * %s = %s\n", strIn1, strIn2, strOut);
 
+    f5 = my_atof(strIn3);
+    f6 = my_atof(strIn4);
+    f3 = multiplyFloats(f5, f6);
+    my_ftoa(f3, strOut);
+	printf("%s * %s = %s\n", strIn3, strIn4, strOut);
 
+    f3 = multiplyFloats(f1, f3);
+    my_ftoa(f3, strOut);
+	printf("%s * %s = %s\n", strIn1, strIn3, strOut);
+
+    // add some stuff
+    f4 = addFloats(f1, f2);
+    my_ftoa(f4, strOut2);
+    printf("%s + %s = %s\n", strIn1, strIn2, strOut2);
+
+    f4 = addFloats(f5, f6);
+    my_ftoa(f4, strOut2);
+    printf("%s + %s = %s\n", strIn3, strIn4, strOut2);
+
+    f4 = addFloats(f2, f4);
+    my_ftoa(f4, strOut2);
+    printf("%s + %s = %s\n", strIn2, strIn4, strOut2);
 }
