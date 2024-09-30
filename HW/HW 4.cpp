@@ -74,7 +74,6 @@ void print8bits(unsigned char x)
 	}
 }
 
-
 /*
 Prints each bit of a 16 bit int
 */
@@ -88,42 +87,18 @@ void print16bits(unsigned short x)
 	}
 }
 
-
-/*
-Prints each bit of a 16 bit int
-*/
-void print32bits(unsigned long x)
-{
-	for(unsigned long mask = 0x80000000; mask; mask >>= 1) {
-		if(mask & x) 
-			printf("1");
-		else 
-			printf("0");
-	}
-}
-
-
 /*
 Converts a floating point number from a string representation to
 an 8-bit representation using only INTEGER operations.
-
-0) copy whole and fractional parts of string to lil buffers
-1) convert string whole part to binary
-2) convert string fractional part to binary x 100,000,000 decimal
-3) convert integer fractional to float mantissa by subtracting
-   neg powers of 2 times 100,000,000 dec (integer subtraction)
-   to figure out the bits 2^1/2, 2^1/4 ... 2^1/256
-4) normalize and calculate exponent
-5) final packing
 */
 unsigned char my_atof(char * str)
 {
 	char strIn[20];
 
 	// check if negative and remove sign for convenience
-	int negative = false;
+	int negative = 0;
 	if(str[0] == '-') {
-		negative = true;
+		negative = 1;
 		strcpy(strIn, str + 1);
 	} else
 		strcpy(strIn, str);
@@ -149,32 +124,22 @@ unsigned char my_atof(char * str)
 		s_fract[j] = strIn[i];
 
 	// convert whole part from a string to binary
-	// these are all integer operations internally
 	unsigned char i_whole = 0;
 	for(int i = 0; i < S_WHOLE_SIZE - 1; i ++)
 		i_whole += (s_whole[i] - '0') * my_pow(10, i);
 
 	// check for overflow 
-	// 16 in binary is 10000 = 1.0000 x 2 ^ 4, exponent will not fit
-	// note that there are float values > 15.0 that will fit with ROUND error
 	if(i_whole > 15){   // (2 ^ n) - 1   in general
 		printf("atof conversion Overflow %s", str);
 		exit(0);
 	}
 	
 	// convert fractional part from a string to binary (x 100,000,000 decimal)
-	// these are all integer operations internally.
 	unsigned long i_fract = 0;
 	for(int i = 0; i < S_FRACT_SIZE - 1; i ++)
 		i_fract += (s_fract[i] - '0') * my_pow(10, i);
 
 	// convert the fraction from integer to our floating binary format
-	// subtract negative powers of 2 (x100,000,000 decimal)
-	// Example: 2^-1 = 1/2 = 0.5,  2^-2 = 1/4 = 0.25,  etc.
-	// Scaled:  50000000, 25000000,  ...  00390625
-	// Could also use the multiplication method but that is more
-	// computationally expensive than subtraction:
-	// http://sandbox.mc.edu/~bennet/cs110/flt/dtof.html
 	unsigned long powof2 = 50000000;
 	unsigned char b_fract = 0;		// bits to the right of the decimal point
 	unsigned char mask = 0x80;
@@ -186,20 +151,14 @@ unsigned char my_atof(char * str)
 		mask >>= 1;
 		powof2 >>= 1;
 	}
-	
-	//print8bits(b_fract);
 
 	// now pack the unnormalized bits to a 'bit field'
-	// so we can normalize it
 	unsigned short buffer = 0;
 	buffer = i_whole;        // put the whole part in the high byte
 	buffer <<= 8;
     buffer |= b_fract;		 // put the fraction part in the low byte
-							 // example:  14.00390625  will be 0000 1110.0000 0001 
-		
-	//print16bits(buffer);
-	
-	// check for underflow - if everything is zero and there is still a remainder
+    	
+	// check for underflow
 	if(!buffer && i_fract){
 		printf("atof conversion Underflow %s", str);
 		exit(0);
@@ -213,15 +172,11 @@ unsigned char my_atof(char * str)
 		mask2 >>= 1;
 	}
 	
-	//printf("exp: %d\n", exponent);
-
-	// another overflow check (redundant)
+	// overflow and underflow checks
 	if(exponent > 3){ 
 		printf("atof conversion Overflow %s", str);
 		exit(0);
 	}
-
-	// another underflow check (for tiny powers of 2)
 	if(exponent < -4){ 
 		printf("atof conversion Underflow %s", str);
 		exit(0);
@@ -242,13 +197,7 @@ unsigned char my_atof(char * str)
 
 /*
 Converts a floating point number from an 8-bit representation
-to a string representation to using only INTEGER operations.
-
-0) unpack whole and fractional parts
-1) multiply fractional part by 100,000,000 decimal by
-   adding up the bit values
-1) convert whole part to base ten string
-2) convert fractional part to base ten string
+to a string representation using only INTEGER operations.
 */
 void my_ftoa(unsigned char f, char * strOut)
 {
@@ -261,17 +210,12 @@ void my_ftoa(unsigned char f, char * strOut)
 	f &= 0x78;								// mask off everything except mantissa
 	f |= 0x80;								// put on the leading 1
 
-	//print8bits(f);	
-
-	// now pack the normalized bits to a 'bit field' so
-	// so we can de-normalize it
+	// now pack the normalized bits to a 'bit field' so we can de-normalize it
 	unsigned short buffer = 0;
 	buffer = f;
 	buffer <<= 8;							// scoot into high byte
 	buffer >>= (7 - exponent);				// de-normalize
 
-	//print16bits(buffer);	 
-	
 	// get the whole part
 	unsigned char i_whole;					// bits to left of decimal
 	i_whole = (buffer & 0xFF00) >> 8;
@@ -281,8 +225,6 @@ void my_ftoa(unsigned char f, char * strOut)
 	b_fract = (buffer & 0x00FF);
 
 	// add up the bit values in the mantissa using INTEGERS only
-	// we are adding up negative powers of 2 scaled by 100,000,000 decimal
-	// NOTE:  Could easily loopify this...
 	unsigned long i_fract = 0;
 	if(b_fract & 0x80) i_fract += 50000000;
 	if(b_fract & 0x40) i_fract += 25000000;
@@ -294,12 +236,6 @@ void my_ftoa(unsigned char f, char * strOut)
 	if(b_fract & 0x01) i_fract +=   390625;
 
 	// convert to decimal string format 00.00000000 with optional leading '-'
-	// Note:  Could loopify this but need to calculate the subtractor
-	// values. Could do that using integer division (expensive), or
-	// integer multiplication (also expensive).
-	// BUT, could use a (fast) lookup table for the subtractor values
-	// to avoid division.
-	
 	// first do the integer part
 
 	// do the tens
@@ -392,133 +328,101 @@ void my_ftoa(unsigned char f, char * strOut)
 
 /*
 Adds two 8-bit floating point numbers.
-
-Puts them into 16 bit buffers, denormalizes them
-Adds them as integers, normalizes the result.
-
-Only works for positive numbers.
-
-Based more or less kinda on:
-http://pages.cs.wisc.edu/~smoler/x86text/lect.notes/arith.flpt.html
-
-Example:        2.125  +          0.125  =          2.25
-Binary:  1.0001 x 2^1  +  1.0000 x 2^-3  =  1.0010 x 2^1
-Packed:    0 0001 101  +     0 0000 001  =    0 0010 101
-
-Unpacked:           0000 0010.0010 0000
-                  + 0000 0000.0010 0000
-				  = 0000 0010.0100 0000
-
 */
-unsigned char addFloats(unsigned char f1, unsigned char f2)
-{	
-	unsigned char theFloat = 0;	  // the answer to return
+unsigned char addFloats(unsigned char f1, unsigned char f2) {
+    unsigned char mantissa1, mantissa2;
+    int exponent1, exponent2, exponentResult;
+    unsigned int mantissaResult;
+    unsigned char sign1, sign2;
 
-	// repack the bits to a 'bit field' and de-normalize it
-	// get the exponent
-	// mask off everything except mantissa
-	// put on the leading 1
-	// scoot into high byte
-	// de-normalize
+    sign1 = (f1 >> 7) & 0x01;
+    exponent1 = (f1 >> 4) & 0x0F;
+    mantissa1 = (f1 & 0x0F) | 0x10;
 
-	// DO AGAIN FOR SECOND NUMBER
-
-	// add them with ordinary integer addition!
-	//buffer3 = buffer1 + buffer2;
-
-	// normalize - find the first 1
+    sign2 = (f2 >> 7) & 0x01;
+    exponent2 = (f2 >> 4) & 0x0F;
+    mantissa2 = (f2 & 0x0F) | 0x10;
 	
-	//printf("exp: %d\n", exponent3);
+    if (exponent1 > exponent2) {
+        mantissa2 >>= (exponent1 - exponent2);
+        exponentResult = exponent1;
+    } else if (exponent1 < exponent2) {
+        mantissa1 >>= (exponent2 - exponent1);
+        exponentResult = exponent2;
+    } else {
+        exponentResult = exponent1;
+    }
 
-	// overflow check - if exponent is greater than 3
+    if (sign1 == sign2) {
+        mantissaResult = mantissa1 + mantissa2;
+    } else {
+        if (mantissa1 >= mantissa2) {
+            mantissaResult = mantissa1 - mantissa2;
+        } else {
+            mantissaResult = mantissa2 - mantissa1;
+            sign1 = sign2; 
+        }
+    }
 
-	// underflow check - if exponent is less than -4
+    if (mantissaResult >= 0x20) {
+        mantissaResult >>= 1;
+        exponentResult++;
+    }
 
-	// final packing
+    if (exponentResult > 0x0F) {
+        exponentResult = 0x0F;
+    } else if (exponentResult < 0) {
+        exponentResult = 0;
+    }
 
-	// align mantissa
-	// scoot into low byte
-	// pack the mantissa
-	// mask off the other stuff
-	// the excess 4 thing
-	// insert the exponent
-	// insert sign bit
-
-	return theFloat;
-
+    return (sign1 << 7) | (exponentResult << 4) | (mantissaResult & 0x0F);
 }
+
 
 /*
 Multiplies two 8-bit floating point numbers.
-
-Puts them into 16 bit buffers, NORMALIZED
-Multiplies them as integers
-Normalizes the result
-Adds the exponents.
-
-Based more or less kinda on:
-http://pages.cs.wisc.edu/~smoler/x86text/lect.notes/arith.flpt.html
-
-Example:          1.5  *           1.5  =        2.25
-Binary:  1.1000 x 2^0  *  1.1000 x 2^0  =  1.0010 x 2^1
-Packed:    0 1000 100  *    0 1000 100  =    0 0010 101
-
-Unpacked NORMALIZED:		  0000 0001.1000 0000  e0
-					   *	  0000 0001.1000 0000  e0
-				       = 0010.0100 0000 0000 0000  e1 = e0 + e0 + e1rollover
-                             
-	normalize          =      0000 0001 0010 0000  e1
 */
-unsigned char multiplyFloats(unsigned char f1, unsigned char f2)
-{
-	unsigned char theFloat = 0;	// the answer to return
-	
-	// repack the bits to a 'bit field' keep it normalized
+unsigned char multiplyFloats(unsigned char f1, unsigned char f2) {
+    unsigned char mantissa1, mantissa2;
+    int exponent1, exponent2, exponentResult;
+    unsigned int mantissaResult;
+    unsigned char sign1, sign2, resultSign;
 
-	// get the exponent
-	// mask off everything except mantissa
-	// put on the leading 1
-	// scoot into normal position
+    sign1 = (f1 >> 7) & 0x01;
+    exponent1 = (f1 >> 4) & 0x0F;
+    mantissa1 = (f1 & 0x0F) | 0x10; 
 
-	// REPEAT FOR SECOND NUMBER
-	
-	// multiply them with ordinary integer multiplication!
-	//buffer3 = buffer1 * buffer2;
+    sign2 = (f2 >> 7) & 0x01;
+    exponent2 = (f2 >> 4) & 0x0F;
+    mantissa2 = (f2 & 0x0F) | 0x10; 
 
-	// normalize the result
-	
-	// check if answer is >= 2
-	// normalize and set rollover value
+    mantissaResult = mantissa1 * mantissa2;
 
-	// calculate exponent for answer
-	//int exponent3 = exponent1 + exponent2 + rollover;
-	
-	//printf("exp: %d\n", exponent3);
+    if (mantissaResult >= 0x100) {
+        mantissaResult >>= 1;
+        exponent1++;
+    }
 
-	// overflow check - if exponent is greater than 3
+    exponentResult = (exponent1 + exponent2 - 7);
 
-	// underflow check - if exponent is less than -4
+    if (exponentResult > 0x0F) {
+        exponentResult = 0x0F;
+    } else if (exponentResult < 0) {
+        exponentResult = 0; 
+    }
 
-	// final packing
-	// scoot into normal position
-	// pack the mantissa
-	// mask off the other stuff
-	// add the excess 4 thing
-	// insert the exponent
-	// insert sign bit
+    resultSign = sign1 ^ sign2;
 
-	printf("Packed Prod: "); print8bits(theFloat); printf("\n");
-
-	return theFloat;
-
+    return (resultSign << 7) | (exponentResult << 4) | ((mantissaResult >> 4) & 0x0F);
 }
+
 
 int main()
 {
 	char strIn1[40] = "0.125";
 	char strIn2[40] = "4.5";
     char strIn3[40] = "3.25";
-	char strIn4[40] = "0.575";
+	char strIn4[40] = "0.5";
 	char strOut[40];
     char strOut2[40];
 	unsigned char f1;
@@ -528,7 +432,7 @@ int main()
     unsigned char f5;
     unsigned char f6;
 
-	// multiply some stuff
+	// Multiply some stuff
 	f1 = my_atof(strIn1);
 	f2 = my_atof(strIn2);
 	f3 = multiplyFloats(f1, f2);
@@ -541,11 +445,11 @@ int main()
     my_ftoa(f3, strOut);
 	printf("%s * %s = %s\n", strIn3, strIn4, strOut);
 
-    f3 = multiplyFloats(f1, f3);
+    f3 = multiplyFloats(f1, f5);
     my_ftoa(f3, strOut);
 	printf("%s * %s = %s\n", strIn1, strIn3, strOut);
 
-    // add some stuff
+    // Add some stuff
     f4 = addFloats(f1, f2);
     my_ftoa(f4, strOut2);
     printf("%s + %s = %s\n", strIn1, strIn2, strOut2);
@@ -554,7 +458,9 @@ int main()
     my_ftoa(f4, strOut2);
     printf("%s + %s = %s\n", strIn3, strIn4, strOut2);
 
-    f4 = addFloats(f2, f4);
+    f4 = addFloats(f2, f6);
     my_ftoa(f4, strOut2);
     printf("%s + %s = %s\n", strIn2, strIn4, strOut2);
+
+    return 0;
 }
