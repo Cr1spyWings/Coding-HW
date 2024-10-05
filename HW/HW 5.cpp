@@ -78,7 +78,12 @@ must be 1.
 */
 int IsRefx(int R[MAX][MAX])
 {
-   return 42;  // return a dummy value for now
+   for (int i = 0; i < SIZE; i++) {
+      if (R[i][i] != 1) {
+         return 0;  // Return false if any diagonal element is not 1
+      }
+   }
+   return 1;
 }
 
 
@@ -89,7 +94,14 @@ i,j == j,i for every cell of the matrix
 */
 int IsSymt(int R[MAX][MAX])
 {
-   return 42;  // return a dummy value for now
+   for (int i = 0; i < SIZE; i++) {
+      for (int j = 0; j < SIZE; j++) {
+         if (R[i][j] != R[j][i]) {
+            return 0;  // Return false if symmetry is violated
+         }
+      }
+   }
+   return 1;  // Return true if the matrix is symmetric
 }
 
 
@@ -101,7 +113,16 @@ R2 i,j = sum of R i,k * R k,j
 */
 void SquareMatrix(int R[MAX][MAX], int R2[MAX][MAX])
 {
-
+   for (int i = 0; i < SIZE; i++) {
+      for (int j = 0; j < SIZE; j++) {
+         R2[i][j] = 0;  // Initialize R2[i][j]
+         for (int k = 0; k < SIZE; k++) {
+            R2[i][j] += R[i][k] * R[k][j];  // Matrix multiplication
+         }
+         // Convert to boolean matrix (0 or 1)
+         R2[i][j] = (R2[i][j] > 0) ? 1 : 0;
+      }
+   }
 }
 
 
@@ -113,7 +134,17 @@ Every non-zero element of Rsquared must also be non zero in R
 */
 int IsTrans(int R[MAX][MAX], int R2[MAX][MAX])
 {
-   return 42;  // return a dummy value for now
+   for (int i = 0; i < SIZE; i++) {
+      for (int j = 0; j < SIZE; j++) {
+         R2[i][j] = 0;  // Initialize R2[i][j]
+         for (int k = 0; k < SIZE; k++) {
+            R2[i][j] += R[i][k] * R[k][j];  // Matrix multiplication
+         }
+         // Convert to boolean matrix (0 or 1)
+         R2[i][j] = (R2[i][j] > 0) ? 1 : 0;
+      }
+   }
+   return 1;
 }
 
 /*
@@ -136,7 +167,19 @@ This works because captains are the first members of their class.  Think about i
 */
 void FindECs(int R[MAX][MAX], int EC[MAX])
 {
+   for (int i = 0; i < SIZE; i++) {
+      EC[i] = 1;  // Assume i is a captain
+   }
 
+   // Find the captains by checking backward equivalences
+   for (int i = 1; i < SIZE; i++) {
+      for (int j = 0; j < i; j++) {
+         if (R[i][j] == 1) {  // i is equivalent to j
+            EC[i] = 0;        // i is not a captain because j is earlier and equivalent
+            break;
+         }
+      }
+   }
 }
 
 
@@ -146,7 +189,17 @@ the matrix and print the members of the class.
 */
 void printECs(int R[MAX][MAX], int EC[MAX])
 {
-
+   for (int i = 0; i < SIZE; i++) {
+      if (EC[i] == 1) {  // i is a captain
+         cout << "Equivalence class for captain " << i << ": {";
+         for (int j = 0; j < SIZE; j++) {
+            if (R[i][j] == 1) {
+               cout << j << " ";  // j is in the equivalence class of captain i
+            }
+         }
+         cout << "}" << endl;
+      }
+   }
 }
 
 
@@ -156,7 +209,7 @@ int main(void)
 
    // open source file
    // By default Visual Studio 2019 looks in same folder as cpp file
-   ifstream fin("R1.bin", ios_base::binary);
+   ifstream fin("random_equiv_relation.bin", ios_base::binary);
    if (!fin) { cerr << "Input file could not be opened\n"; exit(1); }
 
    // get the matrix SIZE
@@ -177,10 +230,29 @@ int main(void)
    printMatrix(R);
 
    // more code....
+   if (IsRefx(R)) {
+      cout << "The relation is reflexive." << endl;
+   } else {
+      cout << "The relation is not reflexive." << endl;
+   }
 
+   // Check if the matrix is symmetric
+   if (IsSymt(R)) {
+      cout << "The relation is symmetric." << endl;
+   } else {
+      cout << "The relation is not symmetric." << endl;
+   }
 
+   // Check if the matrix is transitive
+   int R2[MAX][MAX];  // Matrix to store the square of R
+   if (IsTrans(R, R2)) {
+      cout << "The relation is transitive." << endl;
+   } else {
+      cout << "The relation is not transitive." << endl;
+   }
 
-
-
-
+   // Find the equivalence classes
+   FindECs(R, EC);
+   cout << "Equivalence Classes:" << endl;
+   printECs(R, EC);
 }
