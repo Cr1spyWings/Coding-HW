@@ -17,7 +17,7 @@ void generateRandomEquivalenceRelation(int R[MAX][MAX], int size) {
     // Initialize random pairs and ensure symmetry
     srand(time(0));  // Seed for randomness
     for (int i = 0; i < size; i++) {
-        for (int j = i + 1; j < size; j++) {
+        for (int j = i + 1; j < size; j++) {5
             // Randomly decide if there should be a relation between i and j
             if (rand() % 2 == 1) {   // 50% chance to create a relation
                 R[i][j] = 1;
