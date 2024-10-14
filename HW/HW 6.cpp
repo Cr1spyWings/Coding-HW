@@ -27,6 +27,11 @@ using namespace std;
 // but that often requires tricky pointer arithmetic
 char T1[100][100][80];
 char T2[100][100][80];
+//Tables for 4 Tasks
+char T4[100][100][80];
+char T5[100][100][80];
+char T6[100][100][80]; 
+char T7[100][100][80];
 
 
 /*
@@ -125,15 +130,32 @@ Receives a table.
 Returns a table consisting of only the rows which have
 the specified 'value' in the specified 'col'
 */
-void select(char Tout[100][100][80], char Tin[100][100][80], int col, const char* value)
+/*
+Performs a select operation on a table.
+
+Receives a table.
+Returns a table consisting of only the rows which have
+the specified 'value' in the specified 'col'
+*/
+void select(char Tout[100][100][80], char Tin[100][100][80], int col, const char* value) 
 {
    // erase the destination array
    eraseTable(Tout);
 
-   // YOU WRITE THIS
+   int ToutRows = 0;
+    int i = 0;   
 
+    // Determine the number of rows in Tin
+    while (Tin[i][0][0] != '\0') {
+        if (strcmp(Tin[i][col], value) == 0) {
+            strcpy(Tout[ToutRows][0], Tin[i][0]);
+            strcpy(Tout[ToutRows][1], Tin[i][1]);
+            strcpy(Tout[ToutRows][2], Tin[i][2]);
+            ToutRows++; 
+        }
+        i++; 
+    }
 }
-
 
 /*
 Performs a project operation on a table.
@@ -148,8 +170,18 @@ void project(char Tout[100][100][80], char Tin[100][100][80], int cols[100])
    // erase the destination array
    eraseTable(Tout);
 
-   // YOU WRITE THIS
-
+   int destRow = 0;
+   for (int i = 0; i < 100; i++) {
+      if (Tin[i][0][0] == '\0') continue;
+      int destCol = 0;
+      for (int j = 0; j < 100; j++) {
+         if (cols[j] == 1) {
+            strcpy(Tout[destRow][destCol], Tin[i][j]);
+            destCol++;
+         }
+      }
+      destRow++;
+   }
 }
 
 
@@ -162,11 +194,32 @@ matches the value in table2's T2col
 */
 void join(char Tout[100][100][80], char T1[100][100][80], char T2[100][100][80], int T1col, int T2col)
 {
-   // erase the destination array
+   // Erase the destination array
    eraseTable(Tout);
 
-   // YOU WRITE THIS
-   
+   int destRow = 0;
+
+    for (int i = 0; i < 100; i++) {
+        if (strcmp(T1[i][0], "") == 0) break;
+
+        for (int j = 0; j < 100; j++) {
+            if (strcmp(T2[j][0], "") == 0) break;
+
+            if (strcmp(T1[i][T1col], T2[j][T2col]) == 0) {
+                // Copy the row from T1
+                memcpy(Tout[destRow], T1[i], sizeof(T1[i]));
+                
+                int colCount = 3;
+                for (int k = 0; k < 100; k++) {
+                    if (k != T2col) { 
+                        strcpy(Tout[destRow][colCount++], T2[j][k]);
+                    }
+                }
+                destRow++;
+                if (destRow >= 100) break;
+            }
+        }
+    }
 }
 
 /*
@@ -178,15 +231,43 @@ void Union(char Tout[100][100][80], char T1[100][100][80], char T2[100][100][80]
    // erase the destination array
    eraseTable(Tout);
 
-   // YOU WRITE THIS
+   int destRow = 0;
+   for (int i = 0; i < 100; i++) {
+      if (T1[i][0][0] != '\0') {
+         for (int j = 0; j < 100; j++) {
+            strcpy(Tout[destRow][j], T1[i][j]);
+         }
+         destRow++;
+      }
+   }
+   for (int i = 0; i < 100; i++) {
+      if (T2[i][0][0] != '\0') {
+         for (int j = 0; j < 100; j++) {
+            strcpy(Tout[destRow][j], T2[i][j]);
+         }
+         destRow++;
+      }
+   }
+}
+
+// Function to count the number of valid rows in a given 2D array
+int numRows(char array[][100][80]) {
+    int count = 0;
+    
+    for (int i = 0; i < 100; i++) {
+        if (strcmp(array[i][0], "") == 0) {
+            break;
+        }
+        count++; 
+    }
+    return count;
 }
 
 
 /*
 Reads in some tables and does operations on them
 */
-int main(void)
-{
+int main(void) {
    filltable("Professors.txt", T1);
    filltable("Students.txt", T2);
 
@@ -196,31 +277,28 @@ int main(void)
    cout << "Original Students table:\n";
    printTable(T2);
 
-   // select
-   // locals are created in the stack (except statics)
-   // so use a static to prevent stack overflow
+   // SELECT TEST: Extracting students with address '555 Riley'
    static char Temp1[100][100][80];
    select(Temp1, T2, 1, "555 Riley");
    cout << "\nSELECT TEST: Temp1 = Students[Address = 555 Riley]\n";
    printTable(Temp1);
 
-   // project
+   // PROJECT TEST: Extracting Names and Phone Numbers
    cout << "\nPROJECT TEST: Temp2 = Students[Name, Phone]\n";
    static char Temp2[100][100][80];
-   // dynamic arrays are also easy on the stack
-   // cuz they point to the heap
-   int* cols = new int[100];  eraseArray(cols, 100);
-   cols[0] = cols[2] = 1;
+   int* cols = new int[100]; 
+   eraseArray(cols, 100); // Ensure cols array is cleared
+   cols[0] = cols[2] = 1; // Projecting Name and Phone
    project(Temp2, T2, cols);
    printTable(Temp2);
 
-   // join
+   // JOIN TEST: Joining Students and Professors on Address
    cout << "\nJOIN TEST: Temp3 = Students[address = address]Professors\n";
    static char Temp3[100][100][80];
    join(Temp3, T1, T2, 1, 1);
    printTable(Temp3);
 
-   // union
+   // UNION TEST: Combining Students with MoreStudents
    cout << "\nUNION TEST: Temp4 = Students UNION MoreStudents\n";
    static char T3[100][100][80];
    filltable("MoreStudents.txt", T3);
@@ -228,3 +306,82 @@ int main(void)
    Union(Temp4, T2, T3);
    printTable(Temp4);
 
+   filltable("buyer.txt", T4);
+   filltable("department.txt", T5);
+   filltable("employee.txt", T6);
+   filltable("supplier.txt", T7);
+
+   // TASK A: Find all employees who work in departments that supply parts for JCN Electronics
+   cout << "\nTASK A: Finding employees in departments supplying parts for JCN Electronics\n";
+   static char Temp5[100][100][80];
+   static char Temp6[100][100][80];
+   static char Temp7[100][100][80];
+   static char Temp8[100][100][80];
+   static char Temp9[100][100][80];
+
+   select(Temp5, T4, 0, "JCN Electronics");
+   for (int i = 0; i < numRows(Temp5); i++) {
+    select(Temp6, T7, 1, Temp5[i][1]);
+   }
+   for (int i = 0; i < numRows(Temp6); i++) {
+    select(Temp7, T5, 0, Temp6[i][0]); 
+   }
+   for (int i = 0; i < numRows(Temp7); i++) {
+    select(Temp8, T6, 2, Temp7[i][1]); 
+   }
+   int cols1[100] = {0};
+   cols1[1] = 1;
+   project(Temp9, Temp8, cols1);
+   printTable(Temp9); 
+
+   // TASK B: Find all buyers who buy parts in the department managed by Jones
+   cout << "\nTASK B: Finding buyers for the department managed by Jones\n";
+   static char Temp0[100][100][80];
+   static char Temp10[100][100][80];
+   static char Temp11[100][100][80];
+   static char Temp12[100][100][80];
+
+   select(Temp0, T5, 1, "Jones");
+   join(Temp10, T7, Temp0, 0, 0);
+   for (int i = 0; i < numRows(Temp10); i++) {
+    select(Temp11, T4, 1, Temp10[i][1]); 
+   }
+   int cols2[100] = {0};
+   cols2[0] = 1;
+   project(Temp12, Temp11, cols2);
+   printTable(Temp12);
+
+   // TASK C: Find all buyers who buy parts that are produced by the department for which Suzuki works
+   cout << "\nTASK C: Finding buyers for the department where Suzuki works\n";
+   static char Temp13[100][100][80];
+   static char Temp14[100][100][80];
+   static char Temp15[100][100][80];
+   static char Temp16[100][100][80];
+   static char Temp17[100][100][80];
+
+   select(Temp13, T6, 1, "Suzuki");
+   join(Temp14, Temp13, T5, 2, 1);
+   for (int i = 0; i < numRows(Temp14); i++) {
+    select(Temp15, T7, 0, Temp14[i][3]); 
+   }
+   int destRow = numRows(Temp16);
+   for (int i = 0; i < numRows(Temp15); i++) {
+      static char TempTemp[100][100][80];
+      select(TempTemp, T4, 1, Temp15[i][1]);
+
+      for (int j = 0; j < numRows(TempTemp); j++) {
+         for (int k = 0; k < 100; k++) {
+            strcpy(Temp16[destRow][k], TempTemp[j][k]);
+         }
+         destRow++;
+      }
+   }
+   project(Temp17, Temp16, cols2);
+   printTable(Temp17);
+
+   // TASK D: Union of Buyers and MoreBuyers tables
+   cout << "\nTASK D: Union of Buyers and MoreBuyers tables\n";
+   filltable("MoreBuyers.txt", Temp16);
+   Union(Temp17, T4, Temp16);
+   printTable(Temp17);
+}
