@@ -77,9 +77,21 @@ unsigned char fi[4][256];
 
 
 // fill and print the inverse function table
-void fill_fi()
-{
-    // YOU WRITE THIS PLEASE
+void fill_fi() {
+  for (int i = 0; i < 4; i++) {
+    for (int j = 0; j < 256; j++) {
+        fi[i][f[i][j]] = j;
+      }
+    }
+
+  cout << "Inverse Function Table (fi):" << endl;
+  for (int i = 0; i < 4; i++) {
+    cout << "Row " << i << ": ";
+      for (int j = 0; j < 256; j++) {
+        cout << (int)fi[i][j] << " ";
+      }
+      cout << endl;
+  }
 }
 
 
@@ -144,22 +156,62 @@ unsigned char encrypt(unsigned char w, unsigned char key)
 
 }
 
+unsigned char decrypt(unsigned char w, unsigned char key)
+{
+    // intermediate values in the process
+    unsigned char x0, y0, z0;        
+    unsigned char x1, y1, z1;
+    unsigned char x2, y2, z2;
+    unsigned char x3, y3, z3;
+
+    // get base_4 digit values of key by parsing bits... every 2 bits is a base_4 digit
+    unsigned char p, q, r, s;     // key = s x 4^3  +  r x 4^2  +  q x 4^1  +  p x 4^0
+    p = (key & 0x03);
+    q = (key & 0x0C) >> 2;
+    r = (key & 0x30) >> 4;
+    s = (key & 0xC0) >> 6;
+
+    // Reverse Stage 3
+    z3 = w; // input to decrypt
+    y3 = z3 ^ key; // Reverse XOR
+    x3 = swapbytes(y3); // Reverse transposition
+    z2 = fi[p][x3]; // Use inverse substitution
+
+    // Reverse Stage 2
+    y2 = z2 ^ key; // Reverse XOR
+    x2 = swapbytes(y2); // Reverse transposition
+    z1 = fi[q][x2]; // Use inverse substitution
+
+    // Reverse Stage 1
+    y1 = z1 ^ key; // Reverse XOR
+    x1 = swapbytes(y1); // Reverse transposition
+    z0 = fi[r][x1]; // Use inverse substitution
+
+    // Reverse Stage 0
+    y0 = z0 ^ key; // Reverse XOR
+    x0 = swapbytes(y0); // Reverse transposition
+    return fi[s][x0]; // Final inverse substitution to get original w
+}
+
 
 /*
 Yo, sup?
 */
-void main()
+int main()
 {
+  fill_fi();
+  cout << "\n next part \n";
+
     char c;     // the byte to encrypt
 
     // open source file
-    ifstream fin("pPic.bmp", ios_base::binary);
+    ifstream fin("ePic.F24.bob", ios_base::binary);
     if (!fin) { cerr << "Input file could not be opened\n"; exit(1); }
 
     // open destination file
     ofstream fout("ePic.bmp", ios_base::binary);
     if (!fout) { cerr << "Output file could not be opened\n"; exit(1); }
-
+  /*
     // read, encrypt, write
     while (!fin.eof())
     {
@@ -171,18 +223,37 @@ void main()
             fout.write(&c, 1);
         }
     }
-
-    fin.close();
-    fout.close();
-
-    /*
-    // handy code to build a filename string for iterative (brute force) crack
+  */
     char filename[30];
     char numstr[10];
-    
-    strcpy(filename, "pPic");
-    itoa(key, numstr, 10);
-    strcat(filename, numstr);
-    strcat(filename, ".bmp");
-    */
+     for (unsigned char key = 0; key <= 255; key++) {
+        // Create a new filename based on the current key
+        strcpy(filename, "pPic");
+        itoa(key, numstr, 10); // Convert key to string
+        strcat(filename, numstr); // Append key number
+        strcat(filename, ".bmp"); // Append file extension
+
+        // Open the destination file for writing
+        ofstream fout(filename, ios_base::binary);
+        if (!fout) {
+            cerr << "Output file could not be opened\n";
+            fin.close();
+            return 1;
+        }
+
+        // Read, decrypt, and write to the new file
+        while (!fin.eof()) {
+            fin.read(&c, 1);
+            if (!fin.eof()) {
+                c = decrypt(c, key); // Decrypt the byte using the current key
+                fout.write(&c, 1);   // Write the decrypted byte to the output file
+            }
+        }
+
+        fout.close(); // Close the output file
+        fin.clear(); // Clear the end-of-file flag
+        fin.seekg(0, ios::beg); // Reset the read position for the next key
+    }
+    fin.close();
+    fout.close();
 }
