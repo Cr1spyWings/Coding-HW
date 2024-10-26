@@ -52,6 +52,7 @@ int main() {
     else printf("These expressions are NOT equivalent\n\n\n");
 
     //Test B
+    equiv = true;
     printf("p q r | p & (q -> r) | (p & q) ^ r \n\n");
     for (bool p : {false, true}) {
         for (bool q : {false, true}) {
@@ -67,6 +68,7 @@ int main() {
     else printf("These expressions are NOT equivalent\n\n\n");
 
     //Test C
+    equiv = true;
     printf("p q | p <-> q | ~(p ^ q)\n\n");
     for (bool p : {false, true}) {
         for (bool q : {false, true}) {
@@ -80,6 +82,7 @@ int main() {
     else printf("These expressions are NOT equivalent\n\n\n");
 
     //Test D
+    equiv = true;
     printf("p q r | (p <-> q) -> r | p & (~q | r) \n\n");
     for (bool p : {false, true}) {
         for (bool q : {false, true}) {
@@ -95,6 +98,7 @@ int main() {
     else printf("These expressions are NOT equivalent\n\n\n");
 
     //Test E
+    equiv = true;
     printf("p q r | ~(p -> (q & r)) | p & ~(q & r) \n\n");
     for(bool p : {false, true}) {
         for (bool q : {false, true}) {
@@ -110,6 +114,7 @@ int main() {
     else printf("These expressions are NOT equivalent\n\n\n");
 
     //Test F
+    equiv = true;
     printf("p q | p | (p ? q) | p & (p @ q)\n\n");
     for (bool p : {false, true}) {
         for (bool q : {false, true}) {
