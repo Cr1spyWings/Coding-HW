@@ -223,7 +223,7 @@ int main()
             fout.write(&c, 1);
         }
     }
-  */
+
     char filename[30];
     char numstr[10];
      for (unsigned char key = 0; key <= 255; key++) {
@@ -254,6 +254,7 @@ int main()
         fin.clear(); // Clear the end-of-file flag
         fin.seekg(0, ios::beg); // Reset the read position for the next key
     }
+  */
     fin.close();
     fout.close();
 }
