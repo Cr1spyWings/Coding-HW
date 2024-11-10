@@ -9,6 +9,7 @@
 */
 #include <iostream>
 #include <fstream>
+#include <cstring>
 #pragma warning( disable : 4996) 
 #pragma warning( disable : 4244) 
 using namespace std;
@@ -28,7 +29,7 @@ char state = 0;
 int Count = 0;
 
 // hard code input string
-char instr[80] = "abab";   //"abbbbbbaaaaaba";
+char instr[80] = "aaaabababaaaaabbaaaa";   //"abbbbbbaaaaaba";
 
 void process(char ch)
 {
@@ -90,21 +91,27 @@ Create a state table for a sequence detector
 void create_StateTable(void)
 {
     /////////////////  YOU WRITE THIS FUNCTION PLEASE  ////////////////
+    int len = strlen(instr);
 
-    /* you may need these things...
-    char got[80];
-    got[0] = 0;         // the null terminator
-    strncpy(...);       // handy, but it doesn't do this: got[zeroSpot] = 0;
-    strcat(...);	    // for sticking on a's and b's
-    strlen(...);		// is useful too
-    strncmp_olap(..)	// an amazing function!  try it!
+    for (int s = 0; s <= len; s++) {
+        for (char ch = 'a'; ch <= 'b'; ch++) {
+            if (s == len) {
+                nextState[s][ch - 'a'] = 0;
+            } else {
+                char temp[80];
+                strncpy(temp, instr, s);
+                temp[s] = ch;
+                temp[s + 1] = '\0';
 
-    some tricky s**t...
-    char ch[2] = "a";
-    ch[0]++; // increments the above string to the next character
-    */
-
- }
+                int next = s + 1;
+                while (next > 0 && strncmp(instr, temp + s + 1 - next, next) != 0) {
+                    next--;
+                }
+                nextState[s][ch - 'a'] = next;
+            }
+        }
+    }
+}
 
 
 int main()
@@ -118,10 +125,9 @@ int main()
     ///////////////////	RUN THE STATE MACHINE
 
     char ch;
-    ifstream in("abab.txt");
+    ifstream in("monkeydata.txt");
     if (!in) {
         cout << "Error opening file";
-        return;
     }
 
     cout << "\nThe string " << instr << " was found at locations: ";
@@ -132,5 +138,4 @@ int main()
         if (in)
             process(ch);
     }
-
 }
