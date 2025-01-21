@@ -51,7 +51,7 @@ int totalchars = 0;
 //                 0                                       1                                       2
 //                 0   1   2   3   4   5   6   7   8   9   0   1   2   3   4   5   6   7   8   9   0   1   2   3   4   5   6
 //                 a   b   c   d   e   f   g   h   i   j   k   l   m   n   o   p   q   r   s   t   u   v   w   x   y   z  ' '
-char imap[27] = { 'I','P','J','d','Q','f','I','H','G','j','M','l','m','T','N','p','q','X','s','t','L','W','S','x','y','O','@' };
+char imap[27] = { 'Q','P','L','Z','Y','B','I','H','A','C','M','U','V','T','N','J','E','G','F','D','X','W','S','R','K','O',' ' };
 
 /*
 ******************************************************************
@@ -63,7 +63,7 @@ int main()
     char ch;
 
     // open the input file
-    ifstream in("eText.txt");
+    ifstream in("eText.F24.txt");
     if (!in) {
         cout << "Cannot open input file.\n";
     }
@@ -77,7 +77,7 @@ int main()
 
             // COUNT ENCRYPTED LETTERS
             totalchars++;
-            if (ch == ' ')
+            if (ch == '@')
                 charfreqs[26].count++;
             else
                 charfreqs[ch - 'a'].count++;
@@ -85,7 +85,7 @@ int main()
             // DO THE ACTUAL DECRYPTION HERE
             // this works fine....if your imap[] is correct!
             // that's all there is to it.
-            if (ch == ' ')
+            if (ch == '@')
                 ch = imap[26];
             else
                 ch = imap[ch - 'a'];
