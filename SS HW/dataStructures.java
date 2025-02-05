@@ -208,3 +208,7 @@ public class dataStructures {
     }
   }
 }
+
+// Refelction
+// It would probably be best to use an array to store an inventory application of the above items since its easy to loop through and you're not limited to searching in a specific order
+// It was interesting to learn just how similarly the different lists were to each other while being able to produce a very similar output.
