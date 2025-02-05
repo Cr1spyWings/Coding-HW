@@ -108,21 +108,21 @@ VI   I   III        1 17 12             BQ CR DI EJ KW MT OS PX UZ GH       AAA
 */
 
 // rotor Order, from left to right (Walzenlage)
-int o[3] = { 5, 0, 2 };     // zero-based values from 0 to 7 (Pick 3 from Rotors I thru VIII)
+int o[3] = { 3, 1, 0 };     // zero-based values from 0 to 7 (Pick 3 from Rotors I thru VIII)
 
 // rotor Step position, from left to right (Grundstellung)
 // these positions "increment" after every input, that is the power of enigma!
-int s[3] = { 0, 16, 11 };   // zero-based values from 0 to 25
+int s[3] = { 18, 5, 23 };   // zero-based values from 0 to 25
 
 // rotor Ring, from left to right (Ringstellung)
-int r[3] = { 0, 0, 0 };     // zero-based values from 0 to 25
+int r[3] = { 19, 17, 10 };     // zero-based values from 0 to 25
 
 
 // Plugs (Steckerverbindungen)
 char p[26] = {
     //     0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24  25
     //     A   B   C   D   E   F   G   H   I   J   K   L   M   N   O   P   Q   R   S   T   U   V   W   X   Y   Z
-           0, 16, 17,  8,  9,  5,  7,  6,  3,  4, 22, 11, 19, 13, 18, 23,  1,  2, 14, 12, 25, 21, 10, 15, 24, 20
+           0,  13,  23, 20, 4,  19,  6,  7,  9,  8, 14, 11, 12, 1, 10, 15, 16, 17, 18, 5, 3, 21, 22, 2, 24, 25
     //     0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25  // NO PLUGS
 };
 char pi[26];  // inverse plugs
