@@ -1,0 +1,87 @@
+[
+  {
+    "name": "Casa Grande",
+    "temperatures": [
+      76,
+      68,
+      60,
+      64,
+      68
+    ],
+    "distances": {
+      "Casa Grande": 0,
+      "Chandler": 31,
+      "Flagstaff": 193,
+      "Lake Havasu City": 249,
+      "Sedona": 164
+    }
+  },
+{
+    "name": "Chandler",
+    "temperatures": [
+      77,
+      68,
+      61,
+      65,
+      68
+    ],
+    "distances": {
+      "Casa Grande": 31,
+      "Chandler": 0,
+      "Flagstaff": 168,
+      "Lake Havasu City": 215,
+      "Sedona": 139
+    }
+  },
+  {
+    "name": "Flagstaff",
+    "temperatures": [
+      46,
+      35,
+      33,
+      40,
+      44
+    ],
+    "distances": {
+      "Casa Grande": 193,
+      "Chandler": 168,
+      "Flagstaff": 0,
+      "Lake Havasu City": 206,
+      "Sedona": 29
+    }
+  },
+  {
+    "name": "Lake Havasu City",
+    "temperatures": [
+      71,
+      65,
+      63,
+      66,
+      68
+    ],
+    "distances": {
+      "Casa Grande": 249,
+      "Chandler": 215,
+      "Flagstaff": 206,
+      "Lake Havasu City": 0,
+      "Sedona": 232
+    }
+  },
+  {
+    "name": "Sedona",
+    "temperatures": [
+      62,
+      47,
+      45,
+      51,
+      56
+    ],
+    "distances": {
+      "Casa Grande": 164,
+      "Chandler": 139,
+      "Flagstaff": 29,
+      "Lake Havasu City": 232,
+      "Sedona": 0
+    }
+  }
+]
