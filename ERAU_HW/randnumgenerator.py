@@ -50,6 +50,7 @@ while True:
     if check_nums():
         break
 repeated_num, repeats = check_repeat()
+print(lst_of_nums)
 print(f"Creating a random sequence of all integers 1 .. {up_num} required {times_run} randint(1,{up_num}) calls")
 print(f"The integer that was created last was {lst_of_nums[-1]}.")
 if repeated_num != 0 and repeats != 0:
